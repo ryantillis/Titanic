@@ -1,0 +1,61 @@
+---
+title:  "How to Survive the Titanic - A Data Voyage"
+author: <a href="http://www.ryantillis.com"> Ryan Tillis </a>
+date: "11/10/2016"
+runtime: shiny
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+Column {data-width=650}{.sidebar}
+-----------------------------------------------------------------------
+
+### Choose Wisely...
+
+
+```{r}
+textInput("name", label = strong("Enter your Name:"), "Jane Doe")
+
+radioButtons("sex", label = strong("Sex"),
+            choices = c("Female", "Male"), selected = 1)
+
+dateInput("born", "When were you born?", value = "1884-1-1", min = NULL, max = NULL,
+  format = "yyyy-mm-dd", startview = "month", weekstart = 0,
+  language = "en", width = NULL)
+
+radioButtons("class", label = strong("Choose Your Class:"),
+            choices = c(1,2,3), selected = 4)
+
+sliderInput("bw_adjust", label = strong("How much did you pay?"),
+            min = 0, max = 512.3, value = 14.45, step = .1)
+
+selectInput("embark", strong("Where should we pick you up?"), choices = c("Southhampton", "Cherbourgh", "Queenstown"))
+
+
+```
+
+Column {data-width=350}{.tabset}
+-----------------------------------------------------------------------
+
+### Data Exploration
+
+```{r}
+
+```
+
+### Your Stats
+
+```{r}
+
+```
+
+### Prediction
+```{r}
+
+```

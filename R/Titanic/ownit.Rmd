@@ -1,0 +1,150 @@
+---
+title: "How to Survive the Titanic - A Data Voyage"
+author: "Ryan Tillis"
+date: "11/10/2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+library(DT)
+```
+
+## Synopsis
+
+The goal is to predict titanic survivors from a dataset that features the passenger's class, name, sex, sge, number of siblings/spouses aboard, number of parents/child aboard, ticket number, fare, and the embarking port. This data set has been looked at many times, and has Random Forest written all over it. The goal is to provide a brief data exploration with exploratory visualizations, feature discrimination, and predictive modeling.
+
+##Exploring the Data
+We start by loading the data and examing the first 6 rows.
+```{r loading}
+
+##Include length of name metric
+##Include Pictures for class selection
+##Make Fare input dependent on class
+#Picture of deck
+test <- read.csv("test.csv")
+train <- read.csv("train.csv")
+train <- as.data.table(train)
+test. <- as.data.table(test)
+head(train)
+```
+<hr>
+###Class
+<gr>
+The class variable has 3 distinct levels. The largest group is in class 3 with a near even split between classes 1 and 2, slightly more in class 1.
+
+```{r Pclass}
+train$Pclass <- as.factor(train$Pclass)
+summary(train$Pclass)
+
+ch <- ggplot(train, aes(x=Pclass)) + geom_bar(fill=c(colors()[78], colors()[16], colors()[55]), col=c(colors()[79], colors()[17], colors()[56]), lwd = 2)+labs(x="Class")
+ch
+```
+<hr>
+###Name
+<hr>
+Average length of a name is 27 characters with a max of 82.
+```{r Name}
+summary(sapply(as.character(unique(train$Name)),nchar))#Summary of lengths of name
+```
+<hr>
+###Sex
+<hr>
+Nearly twice as many men
+```{R sex}
+summary(train$Sex)#Almost twice as many men
+
+sb <- ggplot(train, aes(x=Sex)) + geom_bar(fill=c(colors()[542], colors()[121]), col=c(colors()[543], colors()[123]), lwd = 2)+labs(x="Class")
+sb
+
+#create Categorical variables for F123 and M123
+```
+<hr>
+###Age
+<hr>
+Average age around 30 years old with 177 NA's. Need to find a way to impute these values.
+```{r age}
+summary(train$Age) #177 NA's, Median age is 28 aka born in 1884 (start of input), 
+
+ap <- ggplot(train, aes(x=Age))+geom_density(adjust=.5)
+ap
+```
+<hr>
+###Siblings and Spouses
+<hr>
+Most people are going it alone. The median is 0, and only about 1/4 of people are with siblings or spouses.
+
+```{r SibSp}
+unique(train$SibSp)
+#Max Spouse is 1, create sibling data
+#Max parents is 2, create children data
+#Gather wealth data from embarking points
+train$SibSp <- as.integer(train$SibSp) #possibly alone vs with family variable 
+summary(train$SibSp) #median is 0
+
+dim(train[SibSp > 0,])
+dim(train[SibSp == 0,])
+
+sp <- ggplot(train, aes(x=SibSp))+geom_bar()
+sp
+```
+<hr>
+###Parents and Children
+<hr>
+This also suggests most people are without family. About 1/4 have parents or children on board.
+```{r Parch}
+unique(train$Parch)
+summary(train$Parch)
+dim(train[Parch > 0,])
+dim(train[Parch == 0,])
+```
+<hr>
+###Ticket
+<hr>
+
+```{r Ticket}
+length(unique(train$Ticket)) #Create Ticket pre and ticket num and LINE value all as non-integers
+
+#Use ticket to predict cabin
+```
+<hr>
+###Fare
+<hr>
+Only men have Fare values of 0. Women pay an between $5-$24 more per ticket depending on class. 
+```{r Fare}
+train[Fare==0]#who gets a ride without paying? 15/861, all male, all from southhampton (more or less even split class)
+
+length(unique(train$Fare)) #248 unique ticket prices, suggests 248 cabin assignment, use 
+
+train %>% group_by(Pclass) %>% summarise_each(funs(min, max, mean, median),Fare) 
+train %>% group_by(Sex) %>% summarise_each(funs(min, max, mean, median),Fare) #Women pay way more for same (start of input)
+train %>% group_by(Sex, Pclass) %>% summarise_each(funs(min, max, mean, median),Fare) #Women pay way more for same (start of input)
+```
+<hr>
+###Cabin
+<hr>
+There are 148 declared cabin values, a lot are missing. It's possible that the cabin information can be imputed based on ticket number, embarking port, and class but we'll see.
+```{r cabin}
+length(unique(train$Cabin)) #Fill in cabin data
+datatable(data.frame(summary(train$Cabin))) # is it safe to impute cabin data?
+```
+<hr>
+###Embarked
+<hr>
+Three ports 
+```{r Embarked}
+unique(train$Embarked)
+summary(train$Embarked)
+```
+## No Free Rides 
+
+So, this is already interesting... Based on this data, no woman got any free rides on the Titanic. Also, the mean is 
+
+```{r pressure, echo=FALSE}
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
